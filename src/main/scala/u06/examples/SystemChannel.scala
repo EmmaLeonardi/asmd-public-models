@@ -23,7 +23,7 @@ object SystemChannel:
   import SystemChannel.*
   // Analysis, by querying
   println(channel.normalForm(IDLE))
-  println(channel.normalForm(DONE))
+  println(channel.normalForm(DONE)) //Perchè DONE non ha next
   println(channel.next(IDLE))
   println(channel.next(SEND))
   println("P1  "+channel.paths(IDLE,1).toList)
