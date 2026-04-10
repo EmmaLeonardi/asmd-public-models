@@ -24,6 +24,17 @@ object RWMutualExclusion:
     MSet(WRITING)~~>MSet(START, CRITICAL_SECTION)
   ).toSystem
 
+  // DSL-like specification of a Petri Net
+  def pnRWLoopless = PetriNet[PlaceRW](
+    MSet(START) ~~> MSet(READY),
+    MSet(READY) ~~> MSet(READY_READ),
+    MSet(READY) ~~> MSet(READY_WRITE),
+    MSet(READY_READ, CRITICAL_SECTION) ~~> MSet(READING, CRITICAL_SECTION),
+    MSet(READING) ~~> MSet(),
+    MSet(READY_WRITE, CRITICAL_SECTION) ~~> MSet(WRITING) ^^^ MSet(READING),
+    MSet(WRITING) ~~> MSet(CRITICAL_SECTION)
+  ).toSystem
+
 @main def mainRWMutualExclusion =
   import RWMutualExclusion.*
   // example usage
