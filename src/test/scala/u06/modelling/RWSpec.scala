@@ -5,9 +5,9 @@ import org.scalatest.matchers.should.Matchers.*
 import u06.utils.MSet
 
 import scala.u06.examples.RWMutualExclusion.PlaceRW.*
-import scala.u06.examples.RWMutualExclusion.{pnRW, pnRWLoopless}
+import scala.u06.examples.RWMutualExclusion.{pnRW, pnRWLoopless, pnRWReaderPriority, pnRWWriterPriority}
 
-class ReadersWritersSpec extends AnyFunSuite:
+class RWSpec extends AnyFunSuite:
 
   test("Readers Writers for mutual exclusion should properly work with one token"):
 
@@ -79,3 +79,25 @@ class ReadersWritersSpec extends AnyFunSuite:
       two_writers
     set should contain:
       one_reader_one_writer
+      
+      
+  test("Readers Writers for mutual exclusion with priority"):
+    val reader_priority=List(MSet(START, START, CRITICAL_SECTION), MSet(READY, START, CRITICAL_SECTION),
+      MSet(READY_WRITE, START, CRITICAL_SECTION), MSet(READY_WRITE, READY, CRITICAL_SECTION),
+      MSet(READY_WRITE, READY_READ, CRITICAL_SECTION), MSet(READING, CRITICAL_SECTION, READY_WRITE),
+      MSet(START, CRITICAL_SECTION, READY_WRITE), MSet(WRITING, START))
+
+    val writer_priority=List(MSet(START, START, CRITICAL_SECTION), MSet(READY, START, CRITICAL_SECTION),
+      MSet(READY_WRITE, START, CRITICAL_SECTION), MSet(READY_WRITE, READY, CRITICAL_SECTION),
+      MSet(READY_WRITE, READY_READ, CRITICAL_SECTION), MSet(WRITING, READY_READ),
+      MSet(START, CRITICAL_SECTION, READY_READ), MSet(START, CRITICAL_SECTION, READING))
+
+    val set=pnRWReaderPriority.paths(MSet(START, START, CRITICAL_SECTION), 8).toSet
+    //Reader priority prioritizes reader actions
+     set should contain:
+      reader_priority
+
+    val set2=pnRWWriterPriority.paths(MSet(START, START, CRITICAL_SECTION), 8).toSet
+    //Writer priority prioritizes writer actions
+    set2 should contain:
+        writer_priority

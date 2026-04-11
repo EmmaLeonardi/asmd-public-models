@@ -35,6 +35,30 @@ object RWMutualExclusion:
     MSet(WRITING) ~~> MSet(CRITICAL_SECTION)
   ).toSystem
 
+  // DSL-like specification of a Petri Net
+  def pnRWReaderPriority = PetriNet[PlaceRW](
+    MSet(START)~~>MSet(READY),
+    MSet(READY)~~>MSet(READY_READ),
+    MSet(READY)~~>MSet(READY_WRITE),
+    MSet(READY_READ, CRITICAL_SECTION)~~>MSet(READING, CRITICAL_SECTION),
+    MSet(READING)~~>MSet(START),
+    MSet(READY_WRITE, CRITICAL_SECTION)~~>MSet(WRITING) ^^^ MSet(READING),
+    MSet(WRITING)~~>MSet(START, CRITICAL_SECTION),
+    MSet(READY_READ, READY_WRITE, CRITICAL_SECTION)~~>MSet(READING, CRITICAL_SECTION, READY_WRITE)
+  ).toSystem
+
+  // DSL-like specification of a Petri Net
+  def pnRWWriterPriority = PetriNet[PlaceRW](
+    MSet(START) ~~> MSet(READY),
+    MSet(READY) ~~> MSet(READY_READ),
+    MSet(READY) ~~> MSet(READY_WRITE),
+    MSet(READY_READ, CRITICAL_SECTION) ~~> MSet(READING, CRITICAL_SECTION),
+    MSet(READING) ~~> MSet(START),
+    MSet(READY_WRITE, CRITICAL_SECTION) ~~> MSet(WRITING) ^^^ MSet(READING),
+    MSet(WRITING) ~~> MSet(START, CRITICAL_SECTION),
+    MSet(READY_READ, READY_WRITE, CRITICAL_SECTION) ~~> MSet(READY_READ, WRITING)
+  ).toSystem
+
 @main def mainRWMutualExclusion =
   import RWMutualExclusion.*
   // example usage
